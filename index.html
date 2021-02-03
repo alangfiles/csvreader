@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CSV Viewer</title>
+    <script>
+      const separator = ";";
+      const lineseparator = "\n";
+
+      let csvObject = {};
+      let headers;
+
+      function createCSVobject(csv) {
+        try {
+          //creates an obj out of that csv mess
+          let rows = csv.split(lineseparator);
+          csvObject.headers = rows[0].split(separator);
+          rows.forEach((r) => {
+            let rowEntry = r.split(separator);
+            csvObject[rowEntry[0]] = rowEntry;
+          });
+          //console.log("CSVOBject", csvObject);
+        } catch (e) {
+          alert("errored out trying to parse csv");
+        }
+      }
+
+      function readFile() {
+        const fileInput = document.getElementById("csvFile");
+
+        var reader = new FileReader();
+        reader.onload = function () {
+          createCSVobject(reader.result);
+        };
+        reader.readAsBinaryString(fileInput.files[0]);
+      }
+
+      function searchFields(input) {
+        const val = document.getElementById("csvKey").value.trim();
+        const row = csvObject[val];
+        displayRow(row);
+      }
+
+      function displayRow(row) {
+        let displayBox = document.getElementById("displayBox");
+        displayBox.innerHTML = "";
+        if (row) {
+          row.forEach((i, idx) => {
+            let elem = document.createElement("div");
+            elem.innerHTML =
+              "<b>" + csvObject.headers[idx] + "</b>: " + row[idx];
+            displayBox.appendChild(elem);
+          });
+        } else {
+          displayBox.innerHTML = "Couldn't find a row with that identifier";
+        }
+      }
+    </script>
+    <style>
+      body {
+        margin: 0;
+      }
+      #searchBox {
+        background-color: lightgrey;
+        padding: 1em;
+      }
+      #displayBox {
+        padding: 1em;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="searchBox">
+      <div id="upload">
+        Use CSV:
+        <input type="file" id="csvFile" />
+        <button onclick="readFile()">Read File</button>
+      </div>
+      <br />
+
+      <div id="search">
+        Search for input with this as it's first field:
+        <input type="text" id="csvKey" />
+        <button onclick="searchFields()">Search</button>
+      </div>
+    </div>
+    <div id="displayBox"></div>
+  </body>
+</html>
